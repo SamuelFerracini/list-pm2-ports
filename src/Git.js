@@ -2,7 +2,7 @@ const Shell = require('./Shell')
 const Util = require('./Util')
 
 class Git {
-  GIT_CONFIG_FILE_PATH = '.git/config'
+  _GIT_CONFIG_FILE_PATH = '.git/config'
 
   _shell
   _util
@@ -13,7 +13,7 @@ class Git {
   }
 
   async getGitReferenceByPath(path) {
-    const filePath = `${path}/${this.GIT_CONFIG_FILE_PATH}`
+    const filePath = `${path}/${this._GIT_CONFIG_FILE_PATH}`
 
     const exists = await this._shell.checkFileExists(filePath)
 

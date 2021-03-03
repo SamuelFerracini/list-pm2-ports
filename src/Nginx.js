@@ -2,7 +2,7 @@ const Shell = require('./Shell')
 const Util = require('./Util')
 
 class Nginx {
-  NGINX_PATH = '/etc/nginx/conf.d/'
+  _NGINX_PATH = '/etc/nginx/conf.d/'
 
   _shell
   _util
@@ -13,7 +13,7 @@ class Nginx {
   }
 
   async _getNginxConfigFiles() {
-    const raw = await this._shell.exec(`ls ${this.NGINX_PATH}`)
+    const raw = await this._shell.exec(`ls ${this._NGINX_PATH}`)
     return this._util.splitAndSanatize(raw)
   }
 
@@ -25,12 +25,12 @@ class Nginx {
     await Promise.all(
       files.map(async (file) => {
         const exists = await this._shell.checkFileExists(
-          `${NGINX_PATH}/${file}`
+          `${this._NGINX_PATH}/${file}`
         )
 
         if (exists) {
           const rawConfigFile = await this._shell.exec(
-            `grep -i 'server_name\\|proxy_pass' ${NGINX_PATH}/${file}`
+            `grep -i 'server_name\\|proxy_pass' ${this._NGINX_PATH}/${file}`
           )
 
           const [rawDomain, rawPort] = this._util.splitAndSanatize(

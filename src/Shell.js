@@ -24,7 +24,7 @@ class Shell {
 
   _promisify(command) {
     return new Promise((resolve, reject) => {
-      childProcess.exec(command, { stdio: 'pipe' }, (error, stdout, stderr) => {
+      childProcess.exec(command, { stdio: 'pipe' }, (error, stdout, _) => {
         if (error) reject(error)
         resolve(stdout)
       })

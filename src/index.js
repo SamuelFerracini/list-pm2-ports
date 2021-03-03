@@ -4,49 +4,46 @@ const Nginx = require('./Nginx')
 const Discovery = require('./Discovery')
 const Git = require('./Git')
 
-async function main() {
-  const shell = new Shell()
-  const pm2 = new Pm2()
-  const nginx = new Nginx()
-  const discovery = new Discovery()
-  const git = new Git()
+class App {
+  _shell
+  _pm2
+  _nginx
+  _discovery
+  _git
 
-  const applicationsPaths = await pm2.getAllApplicationsPaths()
-
-  if (applicationsPaths.length === 0) {
-    return console.log(
-      `There's no application saved in pm2, did you run pm2 save?`
-    )
+  constructor() {
+    this._shell = new Shell()
+    this._pm2 = new Pm2()
+    this._nginx = new Nginx()
+    this._discovery = new Discovery()
+    this._git = new Git()
   }
 
-  const ports = []
+  async main() {
+    const paths = await this._pm2.getAllApplicationsPaths()
 
-  await Promise.all(
-    applicationsPaths.map(async (path) => {
-      const envPath = `${path}/.env`
-      const exists = await shell.checkFileExists(envPath)
+    if (paths.length === 0) {
+      return console.log(
+        `There's no application saved in pm2, did you run pm2 save?`
+      )
+    }
 
-      if (exists) {
-        const port = await discovery.getPortFromEnv(envPath)
-        ports.push({ port, path })
-      } else {
-        console.log(`File .env not found in ${envPath}`)
-      }
-    })
-  )
+    const applications = await this._discovery.getApplicationPorts(paths)
 
-  const domainPorts = await nginx.getExposedServicesPorts()
+    const domainPorts = await this._nginx.getExposedServicesPorts()
 
-  const merged = await Promise.all(
-    ports.map(async ({ port, path }) => {
-      const { domain } = domainPorts.find((x) => x.port === port)
+    const merged = await Promise.all(
+      applications.map(async ({ port, path }) => {
+        const { domain } = domainPorts.find((x) => x.port === port)
 
-      const gitUrl = await git.getGitReferenceByPath(path)
-      return { port, domain, path, gitUrl }
-    })
-  )
+        const gitUrl = await this._git.getGitReferenceByPath(path)
 
-  return console.table(merged)
+        return { port, domain, path, gitUrl }
+      })
+    )
+
+    return console.table(merged)
+  }
 }
 
-main()
+new App().main()
