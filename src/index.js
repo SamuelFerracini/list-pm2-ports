@@ -2,12 +2,14 @@ const Shell = require('./Shell')
 const Pm2 = require('./Pm2')
 const Nginx = require('./Nginx')
 const Discovery = require('./Discovery')
+const Git = require('./Git')
 
 async function main() {
   const shell = new Shell()
   const pm2 = new Pm2()
   const nginx = new Nginx()
   const discovery = new Discovery()
+  const git = new Git()
 
   const applicationsPaths = await pm2.getAllApplicationsPaths()
 
@@ -35,10 +37,14 @@ async function main() {
 
   const domainPorts = await nginx.getExposedServicesPorts()
 
-  const merged = ports.map(({ port, path }) => {
-    const { domain } = domainPorts.find((x) => x.port === port)
-    return { domain, path, port }
-  })
+  const merged = await Promise.all(
+    ports.map(async ({ port, path }) => {
+      const { domain } = domainPorts.find((x) => x.port === port)
+
+      const gitUrl = await git.getGitReferenceByPath(path)
+      return { port, domain, path, gitUrl }
+    })
+  )
 
   return console.table(merged)
 }

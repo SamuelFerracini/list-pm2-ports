@@ -3,15 +3,15 @@ const childProcess = require('child_process')
 const Util = require('./Util')
 
 class Shell {
-  util
+  _util
 
   constructor() {
-    this.util = new Util()
+    this._util = new Util()
   }
 
   async exec(command) {
     const rawResult = await this._promisify(command)
-    return this.util.sanatizeString(rawResult.toString())
+    return this._util.sanatizeString(rawResult.toString())
   }
 
   async checkFileExists(path) {

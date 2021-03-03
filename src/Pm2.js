@@ -1,16 +1,16 @@
 const Shell = require('./Shell')
 
 class Pm2 {
-  shell
+  _shell
 
   constructor() {
-    this.shell = new Shell()
+    this._shell = new Shell()
   }
 
   async getAllApplicationsPaths() {
-    const currentUser = await this.shell.exec('whoami')
+    const currentUser = await this._shell.exec('whoami')
 
-    const raw = await this.shell.exec(`cat /home/${currentUser}/.pm2/dump.pm2`)
+    const raw = await this._shell.exec(`cat /home/${currentUser}/.pm2/dump.pm2`)
 
     let applications = []
 
