@@ -34,7 +34,11 @@ class App {
 
     const merged = await Promise.all(
       applications.map(async ({ port, path }) => {
-        const { domain } = domainPorts.find((x) => x.port === port)
+        const found = domainPorts.find((x) => x.port === port)
+
+        let domain
+
+        if (found) domain = found.domain
 
         const gitUrl = await this._git.getGitReferenceByPath(path)
 
